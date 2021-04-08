@@ -1,6 +1,7 @@
-const BG_COLOUR = '#231f20';
-const SNAKE_COLOUR = '#c2c2c2';
-const FOOD_COLOUR = '#e66916';
+const BG_COLOUR = '#000000';
+const SNAKE_COLOUR = '#E6A218';
+const SNAKE_COLOUR1 = '#AF10DA';
+const FOOD_COLOUR = '#EE1818';
 
 const socket = io('https://sheltered-island-91254.herokuapp.com/');
 
@@ -11,16 +12,21 @@ socket.on('gameCode', handleGameCode);
 socket.on('unknownCode', handleUnknownCode);
 socket.on('tooManyPlayers', handleTooManyPlayers);
 
+const gameOverScreen = document.getElementById('gameOverScreen');
 const gameScreen = document.getElementById('gameScreen');
 const initialScreen = document.getElementById('initialScreen');
+const winnerScreen = document.getElementById('winnerScreen');
 const newGameBtn = document.getElementById('newGameButton');
 const joinGameBtn = document.getElementById('joinGameButton');
 const gameCodeInput = document.getElementById('gameCodeInput');
 const gameCodeDisplay = document.getElementById('gameCodeDisplay');
+const loserHomeScreenBtn = document.getElementById('loserHomeScreenButton');
+const homeScreenBtn = document.getElementById('homeScreenButton');
 
 newGameBtn.addEventListener('click', newGame);
 joinGameBtn.addEventListener('click', joinGame);
-
+loserHomeScreenBtn.addEventListener('click', home);
+homeScreenBtn.addEventListener('click', home);
 
 function newGame() {
   socket.emit('newGame');
@@ -33,13 +39,26 @@ function joinGame() {
   init();
 }
 
+function home(){
+  reset();
+}
+
+
 let canvas, ctx;
 let playerNumber;
 let gameActive = false;
 
+window.addEventListener("keydown", function(e) {
+  // space and arrow keys
+  if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+  e.preventDefault();
+}
+}, false);
 function init() {
   initialScreen.style.display = "none";
   gameScreen.style.display = "block";
+  gameOverScreen.style.display = "none";
+  winnerScreen.style.display = "none";
 
   canvas = document.getElementById('canvas');
   ctx = canvas.getContext('2d');
@@ -69,7 +88,7 @@ function paintGame(state) {
   ctx.fillRect(food.x * size, food.y * size, size, size);
 
   paintPlayer(state.players[0], size, SNAKE_COLOUR);
-  paintPlayer(state.players[1], size, 'red');
+  paintPlayer(state.players[1], size, SNAKE_COLOUR1);
 }
 
 function paintPlayer(playerState, size, colour) {
@@ -102,9 +121,9 @@ function handleGameOver(data) {
   gameActive = false;
 
   if (data.winner === playerNumber) {
-    alert('You Win!');
+    winner();
   } else {
-    alert('You Lose :(');
+    gameOver();
   }
 }
 
@@ -127,4 +146,16 @@ function reset() {
   gameCodeInput.value = '';
   initialScreen.style.display = "block";
   gameScreen.style.display = "none";
+  gameOverScreen.style.display = "none";
+  winnerScreen.style.display = "none";
+}
+
+function gameOver(){
+  gameScreen.style.display = "none";
+  gameOverScreen.style.display = "block";
+}
+
+function winner(){
+  gameScreen.style.display = "none";
+  winnerScreen.style.display = "block";
 }
